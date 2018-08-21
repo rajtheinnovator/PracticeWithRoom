@@ -79,6 +79,16 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
 
     override fun onResume() {
         super.onResume()
-        mAdapter?.setTasks(mDb?.taskDao()?.loadAllTasks()!!)
+        // Get the diskIO Executor from the instance of AppExecutors and
+        // call the diskIO execute method with a new Runnable and implement its run method
+        AppExecutors.instance.diskIO.execute(Runnable {
+            // Move the logic into the run method and
+            // Extract the list of tasks to a final variable
+            val tasks = mDb?.taskDao()?.loadAllTasks()
+            // Wrap the setTask call in a call to runOnUiThread
+            // We will be able to simplify this once we learn more
+            // about Android Architecture Components
+            runOnUiThread { mAdapter?.setTasks(tasks!!) }
+        })
     }
 }

@@ -31,7 +31,7 @@ class AddTaskActivity : AppCompatActivity() {
 
     private var mTaskId = DEFAULT_TASK_ID
 
-    // COMPLETED (3) Create AppDatabase member variable for the Database
+    // Create AppDatabase member variable for the Database
     // Member variable for the Database
     private var mDb: AppDatabase? = null
 
@@ -42,7 +42,7 @@ class AddTaskActivity : AppCompatActivity() {
 
         initViews()
 
-        // COMPLETED (4) Initialize member variable for the data base
+        // Initialize member variable for the data base
         mDb = AppDatabase.getInstance(applicationContext)
 
         if (savedInstanceState != null && savedInstanceState.containsKey(INSTANCE_TASK_ID)) {
@@ -92,19 +92,22 @@ class AddTaskActivity : AppCompatActivity() {
      * It retrieves user input and inserts that new task data into the underlying database.
      */
     fun onSaveButtonClicked() {
-        // COMPLETED (5) Create a description variable and assign to it the value in the edit text
+        // Create a description variable and assign to it the value in the edit text
         val description = mEditText.getText().toString()
-        // COMPLETED (6) Create a priority variable and assign the value returned by getPriorityFromViews()
+        // Create a priority variable and assign the value returned by getPriorityFromViews()
         val priority = getPriorityFromViews()
-        // COMPLETED (7) Create a date variable and assign to it the current Date
+        // Create a date variable and assign to it the current Date
         val date = Date()
 
-        // COMPLETED (8) Create taskEntry variable using the variables defined above
+
         val taskEntry = TaskEntry(description, priority, date)
-        // COMPLETED (9) Use the taskDao in the AppDatabase variable to insert the taskEntry
-        mDb?.taskDao()?.insertTask(taskEntry)
-        // COMPLETED (10) call finish() to come back to MainActivity
-        finish()
+        // Get the diskIO Executor from the instance of AppExecutors and
+        // call the diskIO execute method with a new Runnable and implement its run method
+        AppExecutors.instance.diskIO.execute(Runnable {
+            // COMPLETED (3) Move the remaining logic inside the run method
+            mDb?.taskDao()?.insertTask(taskEntry)
+            finish()
+        })
     }
 
     /**
