@@ -12,10 +12,14 @@ import java.util.*
 
 
 class AddTaskActivity : AppCompatActivity() {
-    // Extra for the task ID to be received in the intent
-    val EXTRA_TASK_ID = "extraTaskId"
-    // Extra for the task ID to be received after rotation
-    val INSTANCE_TASK_ID = "instanceTaskId"
+
+    companion object {
+        // Extra for the task ID to be received in the intent
+        val EXTRA_TASK_ID = "extraTaskId"
+        // Extra for the task ID to be received after rotation
+        val INSTANCE_TASK_ID = "instanceTaskId"
+    }
+
     // Constants for priority
     val PRIORITY_HIGH = 1
     val PRIORITY_MEDIUM = 2
@@ -54,6 +58,21 @@ class AddTaskActivity : AppCompatActivity() {
             mButton.setText(R.string.update_button)
             if (mTaskId === DEFAULT_TASK_ID) {
                 // populate the UI
+                // Assign the value of EXTRA_TASK_ID in the intent to mTaskId
+                // Use DEFAULT_TASK_ID as the default
+                mTaskId = intent.getIntExtra(EXTRA_TASK_ID, DEFAULT_TASK_ID)
+                // Get the diskIO Executor from the instance of AppExecutors and
+                // call the diskIO execute method with a new Runnable and implement its run method
+                AppExecutors.instance.diskIO.execute(Runnable {
+                    // Use the loadTaskById method to retrieve the task with id mTaskId and
+                    // assign its value to a final TaskEntry variable
+                    val task = mDb?.taskDao()?.loadTaskById(mTaskId)
+                    // Call the populateUI method with the retrieve tasks
+                    // Remember to wrap it in a call to runOnUiThread
+                    // We will be able to simplify this once we learn more
+                    // about Android Architecture Components
+                    runOnUiThread { populateUI(task!!) }
+                })
             }
         }
     }
@@ -84,7 +103,14 @@ class AddTaskActivity : AppCompatActivity() {
      * @param task the taskEntry to populate the UI
      */
     private fun populateUI(task: TaskEntry) {
+        // return if the task is null
+        if (task == null) {
+            return;
+        }
 
+        // Use the variable task to populate the UI
+        mEditText.setText(task.description);
+        setPriorityInViews(task.priority);
     }
 
     /**
@@ -100,14 +126,23 @@ class AddTaskActivity : AppCompatActivity() {
         val date = Date()
 
 
-        val taskEntry = TaskEntry(description, priority, date)
+        val task = TaskEntry(description, priority, date)
         // Get the diskIO Executor from the instance of AppExecutors and
         // call the diskIO execute method with a new Runnable and implement its run method
         AppExecutors.instance.diskIO.execute(Runnable {
-            // COMPLETED (3) Move the remaining logic inside the run method
-            mDb?.taskDao()?.insertTask(taskEntry)
-            finish()
+            // insert the task only if mTaskId matches DEFAULT_TASK_ID
+            // Otherwise update it
+            // call finish in any case
+            if (mTaskId == DEFAULT_TASK_ID) {
+                // insert new task
+                mDb?.taskDao()?.insertTask(task);
+            } else {
+                //update task
+                task.id = mTaskId;
+                mDb?.taskDao()?.updateTask(task);
+            }
         })
+        finish()
     }
 
     /**

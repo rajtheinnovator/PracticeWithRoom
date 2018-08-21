@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.widget.LinearLayout.VERTICAL
+import com.enpassio.practicewithroom.AddTaskActivity
 import com.enpassio.practicewithroom.database.AppDatabase
 
 
@@ -79,6 +80,9 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
 
     override fun onItemClickListener(itemId: Int) {
         // Launch AddTaskActivity adding the itemId as an extra in the intent
+        val intent = Intent(this@MainActivity, AddTaskActivity::class.java)
+        intent.putExtra(AddTaskActivity.EXTRA_TASK_ID, itemId)
+        startActivity(intent)
     }
 
     override fun onResume() {
