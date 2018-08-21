@@ -1,5 +1,6 @@
 package com.enpassio.practicewithroom.database
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.*
 
 
@@ -7,7 +8,7 @@ import android.arch.persistence.room.*
 interface TaskDao {
 
     @Query("SELECT * FROM task ORDER BY priority")
-    fun loadAllTasks(): List<TaskEntry>
+    fun loadAllTasks(): LiveData<List<TaskEntry>>
 
     @Insert
     fun insertTask(taskEntry: TaskEntry)
@@ -19,5 +20,5 @@ interface TaskDao {
     fun deleteTask(taskEntry: TaskEntry)
 
     @Query("SELECT * FROM task WHERE id = :id")
-    fun loadTaskById(id: Int): TaskEntry
+    fun loadTaskById(id: Int): LiveData<TaskEntry>
 }

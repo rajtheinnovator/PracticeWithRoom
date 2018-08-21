@@ -1,5 +1,6 @@
 package com.enpassio.practicewithroom
 
+import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -63,15 +64,12 @@ class AddTaskActivity : AppCompatActivity() {
                 mTaskId = intent.getIntExtra(EXTRA_TASK_ID, DEFAULT_TASK_ID)
                 // Get the diskIO Executor from the instance of AppExecutors and
                 // call the diskIO execute method with a new Runnable and implement its run method
-                AppExecutors.instance.diskIO.execute(Runnable {
-                    // Use the loadTaskById method to retrieve the task with id mTaskId and
-                    // assign its value to a final TaskEntry variable
-                    val task = mDb?.taskDao()?.loadTaskById(mTaskId)
-                    // Call the populateUI method with the retrieve tasks
-                    // Remember to wrap it in a call to runOnUiThread
-                    // We will be able to simplify this once we learn more
-                    // about Android Architecture Components
-                    runOnUiThread { populateUI(task!!) }
+
+                val task = mDb?.taskDao()?.loadTaskById(mTaskId)
+                task?.observe(this, object : Observer<TaskEntry> {
+                    override fun onChanged(taskEntries: TaskEntry?) {
+                        populateUI(taskEntries!!)
+                    }
                 })
             }
         }

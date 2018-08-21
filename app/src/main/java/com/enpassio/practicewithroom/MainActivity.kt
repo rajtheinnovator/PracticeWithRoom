@@ -1,5 +1,6 @@
 package com.enpassio.practicewithroom
 
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -10,8 +11,8 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.widget.LinearLayout.VERTICAL
-import com.enpassio.practicewithroom.AddTaskActivity
 import com.enpassio.practicewithroom.database.AppDatabase
+import com.enpassio.practicewithroom.database.TaskEntry
 
 
 class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
@@ -60,7 +61,6 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
                 val position = viewHolder.adapterPosition
                 val task = mAdapter?.mTaskEntries?.get(position)
                 val deleteTask = mDb?.taskDao()?.deleteTask(task!!)
-                retrieveTasks()
             }
         }).attachToRecyclerView(mRecyclerView)
 
@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
                 startActivity(addTaskIntent)
             }
         })
+        retrieveTasks()
 
     }
 
@@ -85,22 +86,14 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
         startActivity(intent)
     }
 
-    override fun onResume() {
-        super.onResume()
-        retrieveTasks()
-    }
-
     private fun retrieveTasks() {
-        // Get the diskIO Executor from the instance of AppExecutors and
-        // call the diskIO execute method with a new Runnable and implement its run method
-        AppExecutors.instance.diskIO.execute(Runnable {
-            // Move the logic into the run method and
-            // Extract the list of tasks to a final variable
-            val tasks = mDb?.taskDao()?.loadAllTasks()
-            // Wrap the setTask call in a call to runOnUiThread
-            // We will be able to simplify this once we learn more
-            // about Android Architecture Components
-            runOnUiThread { mAdapter?.setTasks(tasks!!) }
+
+        val tasks = mDb?.taskDao()?.loadAllTasks()
+        // Observe tasks and move the logic from runOnUiThread to onChanged
+        tasks?.observe(this, object : Observer<List<TaskEntry>> {
+            override fun onChanged(taskEntries: List<TaskEntry>?) {
+                mAdapter?.setTasks(taskEntries!!);
+            }
         })
     }
 }
