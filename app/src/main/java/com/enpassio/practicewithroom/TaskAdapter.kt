@@ -20,7 +20,7 @@ class TaskAdapter(val context: Context, val listener: ItemClickListener) : Recyc
     // Member variable to handle item clicks
     private val mItemClickListener: ItemClickListener? = listener
     // Class variables for the List that holds task data and the Context
-    private var mTaskEntries: List<TaskEntry>? = null
+    public var mTaskEntries: List<TaskEntry>? = null
     private val mContext: Context = context
     // Date formatter
     private val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())

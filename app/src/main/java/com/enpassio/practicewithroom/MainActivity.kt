@@ -56,6 +56,10 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
             // Called when a user swipes left or right on a ViewHolder
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
                 // Here is where you'll implement swipe to delete
+                val position = viewHolder.adapterPosition
+                val task = mAdapter?.mTaskEntries?.get(position)
+                val deleteTask = mDb?.taskDao()?.deleteTask(task!!)
+                retrieveTasks()
             }
         }).attachToRecyclerView(mRecyclerView)
 
@@ -79,6 +83,10 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
 
     override fun onResume() {
         super.onResume()
+        retrieveTasks()
+    }
+
+    private fun retrieveTasks() {
         // Get the diskIO Executor from the instance of AppExecutors and
         // call the diskIO execute method with a new Runnable and implement its run method
         AppExecutors.instance.diskIO.execute(Runnable {
