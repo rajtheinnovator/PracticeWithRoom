@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.widget.LinearLayout.VERTICAL
+import com.enpassio.practicewithroom.database.AppDatabase
 
 
 class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
@@ -19,6 +20,8 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
     // Member variables for the adapter and RecyclerView
     private lateinit var mRecyclerView: RecyclerView
     private var mAdapter: TaskAdapter? = null
+    private var mDb: AppDatabase? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +41,7 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
 
         val decoration = DividerItemDecoration(applicationContext, VERTICAL)
         mRecyclerView.addItemDecoration(decoration)
+        mDb = AppDatabase.getInstance(applicationContext)
 
         /*
          Add a touch helper to the RecyclerView to recognize when a user swipes to delete an item.
@@ -68,7 +72,13 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
 
     }
 
+
     override fun onItemClickListener(itemId: Int) {
         // Launch AddTaskActivity adding the itemId as an extra in the intent
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mAdapter?.setTasks(mDb?.taskDao()?.loadAllTasks()!!)
     }
 }
