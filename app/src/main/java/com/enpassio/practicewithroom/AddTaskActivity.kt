@@ -1,6 +1,7 @@
 package com.enpassio.practicewithroom
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -65,10 +66,12 @@ class AddTaskActivity : AppCompatActivity() {
                 // Get the diskIO Executor from the instance of AppExecutors and
                 // call the diskIO execute method with a new Runnable and implement its run method
 
-                val task = mDb?.taskDao()?.loadTaskById(mTaskId)
-                task?.observe(this, object : Observer<TaskEntry> {
-                    override fun onChanged(taskEntries: TaskEntry?) {
-                        populateUI(taskEntries!!)
+                val factory = AddTaskViewModelFactory(mDb!!, mTaskId)
+                val viewModel = ViewModelProviders.of(this, factory).get(AddTaskViewModel::class.java)
+                viewModel.task.observe(this, object : Observer<TaskEntry> {
+                    override fun onChanged(taskEntry: TaskEntry?) {
+                        viewModel.task.removeObserver(this)
+                        populateUI(taskEntry!!)
                     }
                 })
             }

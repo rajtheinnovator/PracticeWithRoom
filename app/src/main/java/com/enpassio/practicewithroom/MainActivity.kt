@@ -1,6 +1,7 @@
 package com.enpassio.practicewithroom
 
 import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -74,7 +75,7 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
                 startActivity(addTaskIntent)
             }
         })
-        retrieveTasks()
+        setupViewModel()
 
     }
 
@@ -86,13 +87,12 @@ class MainActivity : AppCompatActivity(), TaskAdapter.ItemClickListener {
         startActivity(intent)
     }
 
-    private fun retrieveTasks() {
+    private fun setupViewModel() {
 
-        val tasks = mDb?.taskDao()?.loadAllTasks()
-        // Observe tasks and move the logic from runOnUiThread to onChanged
-        tasks?.observe(this, object : Observer<List<TaskEntry>> {
+        val viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel.tasks.observe(this, object : Observer<List<TaskEntry>> {
             override fun onChanged(taskEntries: List<TaskEntry>?) {
-                mAdapter?.setTasks(taskEntries!!);
+                mAdapter?.setTasks(taskEntries!!)
             }
         })
     }
